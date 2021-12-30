@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import logging
+import json
 
 from slack_sdk import WebClient
 
@@ -13,12 +14,11 @@ client = WebClient(token=settings.SLACK_BOT_TOKEN)
 # Create your views here.
 @csrf_exempt
 def praise(request):
-    data = request.POST
+    # data = request.POST
     # logger.warning(f'{data["token"]}')
     # logger.warning(f'{data["challenge"]}')
     # logger.warning(f'{data["type"]}')
-    logger.warning(f'{vars(request)}')
-    logger.warning(f'{request.body}')
+    data = json.loads(request.body)
     if 'challenge' in data:
         return JsonResponse({'challenge': data['challenge']})
     logger.warning(f'{data}')
