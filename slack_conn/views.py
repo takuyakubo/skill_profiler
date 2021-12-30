@@ -81,7 +81,7 @@ def praise(channel, user_mentions, reg_text):
         return
     targets_ = [{'user': tr.split('>')[0],
                 'content': tr.split('>')[1].strip()}
-                for tr in targets_raw]
+                for tr in targets_raw[1:]]
     targets = dict()
     for t in targets_:
         if t['user'] not in targets:
