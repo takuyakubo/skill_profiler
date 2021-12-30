@@ -31,7 +31,7 @@ def regularize(text, rem_id):
 
 
 def parse_(text, mode):
-    rules_mention = {'+1': 'praise',}
+    rules_mention = {'+1': praise,}
     rules_command = {'show my history': 'smh',
              'smh': 'smh',
              'show my status': 'sms',
@@ -74,7 +74,35 @@ def view_help_mention(channel, user_mentions, reg_text):
 
 
 def praise(channel, user_mentions, reg_text):
-    pass
+    text_ = reg_text[2:].strip()
+    targets_raw = text_.split('<@')
+    if len(targets_raw) < 2:
+        view_help_mention(channel, user_mentions, reg_text)
+        return
+    targets_ = [{'user': tr.split('>')[0],
+                'content': tr.split('>')[1].strip()}
+                for tr in targets_raw]
+    targets = dict()
+    for t in targets_:
+        if t['user'] not in targets:
+            targets[t['user']] = [t['content']]
+        else:
+            if t['content'] not in targets[t['user']]:
+                targets[t['user']].append(t['content'])
+    if not targets:
+        view_help_mention(channel, user_mentions, reg_text)
+        return
+    send_text = f"<@{user_mentions}>さんは次の人に「ありがとう」と言っています。\n"
+    for user in targets:
+        send_text += f"<@{user}>さん。"
+        reasons = [r for r in targets[user] if r != '']
+        if reasons:
+            send_text += f"理由：{', '.join(reasons)}"
+        send_text += f"\n<@{user}>さんの現在のポイントはn点です。\n"
+    client.chat_postMessage(
+        channel=channel,
+        text=send_text
+    )
 
 
 def under_const(channel, user_mentions, function_key):
