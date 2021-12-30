@@ -15,6 +15,8 @@ client = WebClient(token=settings.SLACK_BOT_TOKEN)
 def praise(request):
 
     data = request.POST
+    if 'challenge' in data:
+        return JsonResponse({'challenge': data['challenge']})
     logger.warning(f'{data}')
     ret_info = {
         'status': 'Bad Request',
