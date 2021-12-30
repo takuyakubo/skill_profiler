@@ -73,6 +73,10 @@ def view_help_mention(channel, user_mentions, reg_text):
     )
 
 
+def praise(channel, user_mentions, reg_text):
+    pass
+
+
 def under_const(channel, user_mentions, function_key):
     text = f'機能: {function_key} は、開発中です。'
 
@@ -84,7 +88,7 @@ def under_const(channel, user_mentions, function_key):
 
 
 @csrf_exempt
-def praise(request):
+def mention(request):
     data = json.loads(request.body)
     invalid_case_response = validate(data, val_keys=['event'])
     if invalid_case_response:
@@ -98,6 +102,7 @@ def praise(request):
     reaction = parse_(reg_text, 'mention')
     channel = data['event']['channel']
     user_mentions = data['event']['user']
+    logger.warning(f'{reg_text}')
     if callable(reaction):
         reaction(channel, user_mentions, reg_text)
     else:
@@ -109,7 +114,7 @@ def praise(request):
 @csrf_exempt
 def profile(request):
     data = request.POST
-    logger.warning(f'{data}')
+    # logger.warning(f'{data}')
     invalid_case_response = validate(data, val_keys=['text', 'channel_id', 'user_id'])
     if invalid_case_response:
         logger.warning(f'{data}')
