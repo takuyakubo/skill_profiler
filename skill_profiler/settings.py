@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'skill_profiler',
     'slack_conn',
+    'user_profile'
 ]
 
 MIDDLEWARE = [

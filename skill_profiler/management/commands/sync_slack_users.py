@@ -5,6 +5,8 @@ from django.conf import settings
 
 from slack_sdk import WebClient
 
+from user_profile.models import UProfile
+
 from time import sleep
 client = WebClient(token=settings.SLACK_BOT_TOKEN)
 User = get_user_model()
@@ -24,11 +26,13 @@ class Command(BaseCommand):
             sleep(5)
         for member in members:
             if not member['deleted'] and member['is_email_confirmed'] and not member['is_restricted']:
-                User.objects.update_or_create(
+                user, created = User.objects.update_or_create(
                     username=member['id'],
                     first_name=member['name'].split('.')[0],
                     last_name=member['name'].split('.')[1],
                     email=member['profile']['email']
                 )
+                UProfile.objects.update_or_create(user=user)
+
 
         self.stdout.write('success')

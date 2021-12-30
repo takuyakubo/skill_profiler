@@ -146,7 +146,7 @@ def mention(request):
 
 
 @csrf_exempt
-def profile(request):
+def command(request):
     data = request.POST
     # logger.warning(f'{data}')
     invalid_case_response = validate(data, val_keys=['text', 'channel_id', 'user_id'])
