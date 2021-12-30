@@ -29,7 +29,7 @@ def praise(request):
 
     channel = data['event']['channel']
     user_mentions = data['event']['user']
-    text = f"Hi, <@{user_mentions}! It's pf_bot>"
+    text = f"Hi, <@{user_mentions}>! It's pf_bot"
     client.chat_postMessage(
         channel=channel,
         text=text
