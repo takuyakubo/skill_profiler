@@ -90,3 +90,8 @@ def praise(request):
 
     return JsonResponse({'status': 'OK'})
 
+
+@csrf_exempt
+def profile(request):
+    data = json.loads(request.body)
+    logger.warning(f'{data}')
