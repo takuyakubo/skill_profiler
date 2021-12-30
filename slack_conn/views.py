@@ -12,7 +12,7 @@ client = WebClient(token=settings.SLACK_PF_BOT_TOKEN)
 
 
 # Create your views here.
-def validate(data):
+def validate(data, val_keys):
     if 'challenge' in data:
         return JsonResponse({'challenge': data['challenge']})
 
@@ -20,16 +20,17 @@ def validate(data):
         'status': 'Bad Request',
         'msg': 'request format is not appropriate.'
     }
-    val_keys = ['event']
+
     for key in val_keys:
         if key not in data:
             return JsonResponse(ret_info)
 
 
-def parse_text(data):
-    self_id = data['authorizations'][0]['user_id']
-    recv_text = data['event']['text']
-    req_text = recv_text.replace(f'<@{self_id}>', '').strip()
+def regularize(text, rem_id):
+    return text.replace(f'<@{rem_id}>', '').strip()
+
+
+def parse_(text):
     rules = {'+1': 'praise',
              'show my history': 'smh',
              'smh': 'smh',
@@ -38,14 +39,12 @@ def parse_text(data):
              'show my activity': 'sma',
              'sma': 'sma',}
     for k, v in rules.items():
-        if req_text.startswith(k):
-            return v, req_text
-    return view_help, None
+        if text.startswith(k):
+            return v
+    return view_help
 
 
-def view_help(data, req_text):
-    channel = data['event']['channel']
-    user_mentions = data['event']['user']
+def view_help(channel, user_mentions, reg_text):
     text = f"こんにちは, <@{user_mentions}>さん!\n使い方は次のとおりです。\n" \
            f"- 誰かに加点したい時、\n" \
            f"  +1 @someone (内容 optional) @someone ...\n" \
@@ -63,9 +62,7 @@ def view_help(data, req_text):
     )
 
 
-def under_const(data, function_key):
-    channel = data['event']['channel']
-    user_mentions = data['event']['user']
+def under_const(channel, user_mentions, function_key):
     text = f'機能: {function_key} は、開発中です。'
 
     client.chat_postEphemeral(
@@ -78,15 +75,22 @@ def under_const(data, function_key):
 @csrf_exempt
 def praise(request):
     data = json.loads(request.body)
-    invalid_case_response = validate(data)
+    invalid_case_response = validate(data, val_keys=['event'])
     if invalid_case_response:
         logger.warning(f'{data}')
         return invalid_case_response
-    reaction, req_text = parse_text(data)
+
+    self_id = data['authorizations'][0]['user_id']
+    recv_text = data['event']['text']
+    reg_text = regularize(recv_text, self_id)
+
+    reaction = parse_(reg_text)
+    channel = data['event']['channel']
+    user_mentions = data['event']['user']
     if callable(reaction):
-        reaction(data, req_text)
+        reaction(channel, user_mentions, reg_text)
     else:
-        under_const(data, reaction)
+        under_const(channel, user_mentions, reaction)
 
     return JsonResponse({'status': 'OK'})
 
@@ -95,4 +99,17 @@ def praise(request):
 def profile(request):
     data = request.POST
     logger.warning(f'{data}')
+    invalid_case_response = validate(data, val_keys=['text', 'channel_id', 'user_id'])
+    if invalid_case_response:
+        logger.warning(f'{data}')
+        return invalid_case_response
+
+    reg_text = data['text'].strip()
+    reaction = parse_(reg_text)
+    channel = data['channel_id']
+    user_mentions = data['user_id']
+    if callable(reaction):
+        reaction(channel, user_mentions, reg_text)
+    else:
+        under_const(channel, user_mentions, reaction)
     return JsonResponse({'status': 'OK'})
