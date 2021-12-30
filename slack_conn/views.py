@@ -93,5 +93,5 @@ def praise(request):
 
 @csrf_exempt
 def profile(request):
-    data = json.loads(request.body)
+    data = request.POST
     logger.warning(f'{data}')
