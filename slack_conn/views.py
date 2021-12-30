@@ -95,3 +95,4 @@ def praise(request):
 def profile(request):
     data = request.POST
     logger.warning(f'{data}')
+    return JsonResponse({'status': 'OK'})
