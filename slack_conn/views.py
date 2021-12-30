@@ -30,31 +30,42 @@ def regularize(text, rem_id):
     return text.replace(f'<@{rem_id}>', '').strip()
 
 
-def parse_(text):
-    rules = {'+1': 'praise',
-             'show my history': 'smh',
+def parse_(text, mode):
+    rules_mention = {'+1': 'praise',}
+    rules_command = {'show my history': 'smh',
              'smh': 'smh',
              'show my status': 'sms',
              'sms': 'sms',
              'show my activity': 'sma',
              'sma': 'sma',}
+    rules = rules_command if mode == 'command' else rules_mention  # if it is mention
+    view_help = view_help_command if mode == 'command' else view_help_mention  # if it is mention
     for k, v in rules.items():
         if text.startswith(k):
             return v
     return view_help
 
 
-def view_help(channel, user_mentions, reg_text):
+def view_help_command(channel, user_mentions, reg_text):
     text = f"こんにちは, <@{user_mentions}>さん!\n使い方は次のとおりです。\n" \
-           f"- 誰かに加点したい時、\n" \
-           f"  +1 @someone (内容 optional) @someone ...\n" \
-           f"  ex) +1 @john wrote a great document @hanako データベースの設計\n" \
            f"- 自分の状況を知りたい時、\n" \
            f"  show my status or sms \n" \
            f"- 自分への履歴が知りたい時、\n" \
            f"  show my history (number optional(default=10)) or smh (number)\n" \
            f"- 自分からの履歴が知りたい時、\n" \
            f"  show my activities (number optional(default=10)) or sma (number)"
+    client.chat_postEphemeral(
+        user=user_mentions,
+        channel=channel,
+        text=text
+    )
+
+
+def view_help_mention(channel, user_mentions, reg_text):
+    text = f"こんにちは, <@{user_mentions}>さん!\n使い方は次のとおりです。\n" \
+           f"- 誰かに加点したい時、\n" \
+           f"  +1 @someone (内容 optional) @someone ...\n" \
+           f"  ex) +1 @john wrote a great document @hanako データベースの設計"
     client.chat_postEphemeral(
         user=user_mentions,
         channel=channel,
@@ -84,7 +95,7 @@ def praise(request):
     recv_text = data['event']['text']
     reg_text = regularize(recv_text, self_id)
 
-    reaction = parse_(reg_text)
+    reaction = parse_(reg_text, 'mention')
     channel = data['event']['channel']
     user_mentions = data['event']['user']
     if callable(reaction):
@@ -105,7 +116,7 @@ def profile(request):
         return invalid_case_response
 
     reg_text = data['text'].strip()
-    reaction = parse_(reg_text)
+    reaction = parse_(reg_text, 'command')
     channel = data['channel_id']
     user_mentions = data['user_id']
     if callable(reaction):
