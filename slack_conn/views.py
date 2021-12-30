@@ -1,12 +1,14 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.contrib.auth import get_user_model
 import logging
 import json
 
 from slack_sdk import WebClient
 
 
+User = get_user_model()
 logger = logging.getLogger('access.request')
 client = WebClient(token=settings.SLACK_PF_BOT_TOKEN)
 
@@ -87,7 +89,7 @@ def praise(channel, user_mentions, reg_text):
     for t in targets_:
         if t['user'] == user_mentions:
             continue
-        if t['user'] not in targets:
+        if t['user'] not in targets and User.objects.filter(username=t['user']).exists():
             targets[t['user']] = [t['content']]
         else:
             if t['content'] not in targets[t['user']]:
@@ -95,6 +97,7 @@ def praise(channel, user_mentions, reg_text):
     if not targets:
         view_help_mention(channel, user_mentions, reg_text)
         return
+
     send_text = f"<@{user_mentions}>さんは次の人に「ありがとう」と言っています。\n"
     for user in targets:
         send_text += f"-------------------\n<@{user}>さん。"
