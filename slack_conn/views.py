@@ -17,6 +17,8 @@ def praise(request):
     # logger.warning(f'{data["token"]}')
     # logger.warning(f'{data["challenge"]}')
     # logger.warning(f'{data["type"]}')
+    logger.warning(f'{vars(request)}')
+
     if 'challenge' in data:
         return JsonResponse({'challenge': data['challenge']})
     logger.warning(f'{data}')
