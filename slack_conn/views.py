@@ -40,6 +40,7 @@ def view_help(data):
            f"- 自分からの履歴が知りたい時、\n" \
            f"show my activities (number optional(default=10)) or sma (number)"
     client.chat_postEphemeral(
+        user=user_mentions,
         channel=channel,
         text=text
     )
