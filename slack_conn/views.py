@@ -31,14 +31,14 @@ def view_help(data):
     user_mentions = data['event']['user']
     text = f"こんにちは, <@{user_mentions}>さん!\n使い方は次のとおりです。\n" \
            f"- 誰かに加点したい時、\n" \
-           f"+1 @someone (内容 optional) @someone ...\n" \
-           f"ex) +1 @john wrote a great document @hanako データベースの設計" \
+           f"  +1 @someone (内容 optional) @someone ...\n" \
+           f"  ex) +1 @john wrote a great document @hanako データベースの設計\n" \
            f"- 自分の状況を知りたい時、\n" \
-           f"show my status or sms \n" \
+           f"  show my status or sms \n" \
            f"- 自分への履歴が知りたい時、\n" \
-           f"show my history (number optional(default=10)) or smh (number)\n" \
+           f"  show my history (number optional(default=10)) or smh (number)\n" \
            f"- 自分からの履歴が知りたい時、\n" \
-           f"show my activities (number optional(default=10)) or sma (number)"
+           f"  show my activities (number optional(default=10)) or sma (number)"
     client.chat_postEphemeral(
         user=user_mentions,
         channel=channel,
