@@ -28,23 +28,22 @@ def validate(data):
 
 def parse_text(data):
     self_id = data['authorizations'][0]['user_id']
-    recv_elements = []
-    for block in data['event']['blocks']:
-        for el in block['elements']:
-            for word in el['elements']:
-                if word['type'] == 'user' and word['user_id'] == self_id:
-                    continue
-                recv_elements.append(word)
-    first_word = recv_elements[0]
-    if first_word['type'] == 'text':
-        first_text = first_word['text']
-        if '+1' in first_text:
-            return 'praise', recv_elements[1:]
-        if 'show' in first_text:
-            pass
+    recv_text = data['event']['text']
+    req_text = recv_text.replace(f'<@{self_id}>', '').strip()
+    rules = {'+1': 'praise',
+             'show my history': 'smh',
+             'smh': 'smh',
+             'show my status': 'sms',
+             'sms': 'sms',
+             'show my activity': 'sma',
+             'sma': 'sma',}
+    for k, v in rules.items():
+        if req_text.startswith(k):
+            return v, req_text
+    return view_help, None
 
 
-def view_help(data):
+def view_help(data, req_text):
     channel = data['event']['channel']
     user_mentions = data['event']['user']
     text = f"こんにちは, <@{user_mentions}>さん!\n使い方は次のとおりです。\n" \
@@ -64,6 +63,18 @@ def view_help(data):
     )
 
 
+def under_const(data, function_key):
+    channel = data['event']['channel']
+    user_mentions = data['event']['user']
+    text = f'機能: {function_key} は、開発中です。'
+
+    client.chat_postEphemeral(
+        user=user_mentions,
+        channel=channel,
+        text=text
+    )
+
+
 @csrf_exempt
 def praise(request):
     data = json.loads(request.body)
@@ -71,7 +82,11 @@ def praise(request):
     if invalid_case_response:
         logger.warning(f'{data}')
         return invalid_case_response
-    logger.warning(f'{data}')
-    view_help(data)
+    reaction, req_text = parse_text(data)
+    if callable(reaction):
+        reaction(data, req_text)
+    else:
+        under_const(data, reaction)
+
     return JsonResponse({'status': 'OK'})
 
