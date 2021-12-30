@@ -94,11 +94,11 @@ def praise(channel, user_mentions, reg_text):
         return
     send_text = f"<@{user_mentions}>さんは次の人に「ありがとう」と言っています。\n"
     for user in targets:
-        send_text += f"<@{user}>さん。"
+        send_text += f"-------------------\n<@{user}>さん。"
         reasons = [r for r in targets[user] if r != '']
         if reasons:
             send_text += f"理由：{', '.join(reasons)}"
-        send_text += f"\n<@{user}>さんの現在のポイントはn点です。\n"
+        send_text += f"\n<@{user}>さんは現在nポイントです。\n"
     client.chat_postMessage(
         channel=channel,
         text=send_text
