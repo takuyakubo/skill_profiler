@@ -13,7 +13,7 @@ client = WebClient(token=settings.SLACK_BOT_TOKEN)
 # Create your views here.
 @csrf_exempt
 def praise(request):
-
+    logger.warning(f'{request}')
     data = request.POST
     if 'challenge' in data:
         return JsonResponse({'challenge': data['challenge']})
