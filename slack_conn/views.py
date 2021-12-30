@@ -2,6 +2,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.contrib.auth import get_user_model
+
+from user_profile.models import UProfile, PraiseHistory
 import logging
 import json
 
@@ -98,13 +100,20 @@ def praise(channel, user_mentions, reg_text):
         view_help_mention(channel, user_mentions, reg_text)
         return
 
+    sent_user = User.objects.get(username=user_mentions)
     send_text = f"<@{user_mentions}>さんは次の人に「ありがとう」と言っています。\n"
     for user in targets:
+        recv_user = User.objects.get(username=user)
+        u_prof = UProfile.objects.get(user=recv_user)
         send_text += f"-------------------\n<@{user}>さん。"
         reasons = [r for r in targets[user] if r != '']
+        reasons_ = ', '.join(reasons)
         if reasons:
-            send_text += f"理由：{', '.join(reasons)}"
-        send_text += f"\n<@{user}>さんは現在nポイントです。\n"
+            send_text += f"理由：{reasons_}"
+        u_prof.current_point += 1
+        u_prof.save()
+        send_text += f"\n<@{user}>さんは現在、{u_prof.current_point}ポイントです。\n"
+        PraiseHistory.objects.create(from_who=sent_user, to_who=recv_user, reasons=reasons_)
     client.chat_postMessage(
         channel=channel,
         text=send_text
