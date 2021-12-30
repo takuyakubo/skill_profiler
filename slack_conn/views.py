@@ -65,7 +65,8 @@ def view_help_mention(channel, user_mentions, reg_text):
     text = f"こんにちは, <@{user_mentions}>さん!\n使い方は次のとおりです。\n" \
            f"- 誰かに加点したい時、\n" \
            f"  +1 @someone (内容 optional) @someone ...\n" \
-           f"  ex) +1 @john wrote a great document @hanako データベースの設計"
+           f"  ex) +1 @john wrote a great document @hanako データベースの設計\n" \
+           f"  注意：自分自身には加点できません。"
     client.chat_postEphemeral(
         user=user_mentions,
         channel=channel,
@@ -84,6 +85,8 @@ def praise(channel, user_mentions, reg_text):
                 for tr in targets_raw[1:]]
     targets = dict()
     for t in targets_:
+        if t['user'] == user_mentions:
+            continue
         if t['user'] not in targets:
             targets[t['user']] = [t['content']]
         else:
