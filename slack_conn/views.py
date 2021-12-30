@@ -26,6 +26,24 @@ def validate(data):
             return JsonResponse(ret_info)
 
 
+def parse_text(data):
+    self_id = data['authorizations'][0]['user_id']
+    recv_elements = []
+    for block in data['event']['blocks']:
+        for el in block['elements']:
+            for word in el['elements']:
+                if word['type'] == 'user' and word['user_id'] == self_id:
+                    continue
+                recv_elements.append(word)
+    first_word = recv_elements[0]
+    if first_word['type'] == 'text':
+        first_text = first_word['text']
+        if '+1' in first_text:
+            return 'praise', recv_elements[1:]
+        if 'show' in first_text:
+            pass
+
+
 def view_help(data):
     channel = data['event']['channel']
     user_mentions = data['event']['user']
@@ -53,6 +71,7 @@ def praise(request):
     if invalid_case_response:
         logger.warning(f'{data}')
         return invalid_case_response
+    logger.warning(f'{data}')
     view_help(data)
     return JsonResponse({'status': 'OK'})
 
