@@ -188,4 +188,4 @@ def command(request):
         reaction(channel, user_mentions, reg_text)
     else:
         under_const(channel, user_mentions, reaction)
-    return JsonResponse({'status': 'OK'})
+    return JsonResponse()
