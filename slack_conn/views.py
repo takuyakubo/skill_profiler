@@ -39,8 +39,8 @@ def parse_(text, mode):
     rules_mention = {'+1': praise,}
     rules_command = {'show my history': 'smh',
              'smh': 'smh',
-             'show my status': 'sms',
-             'sms': 'sms',
+             'show my status': show_my_status,
+             'sms': show_my_status,
              'show my activity': 'sma',
              'sma': 'sma',}
     rules = rules_command if mode == 'command' else rules_mention  # if it is mention
@@ -49,6 +49,18 @@ def parse_(text, mode):
         if text.startswith(k):
             return v
     return view_help
+
+
+def show_my_status(channel, user_mentions, reg_text):
+    user_mentions_ = User.objects.get(username=user_mentions)
+    u_prof = UProfile.objects.get(user=user_mentions_)
+    text = f"こんにちは, <@{user_mentions}>さん!\n" \
+           f" <@{user_mentions}>さんは現在{u_prof.current_point}ポイントです。"
+    client.chat_postEphemeral(
+        user=user_mentions,
+        channel=channel,
+        text=text
+    )
 
 
 def view_help_command(channel, user_mentions, reg_text):
