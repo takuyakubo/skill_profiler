@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from user_profile.models import UProfile, PraiseHistory
 import logging
 import json
+from datetime import datetime, timedelta
 
 from slack_sdk import WebClient
 
@@ -99,8 +100,12 @@ def praise(channel, user_mentions, reg_text):
     if not targets:
         view_help_mention(channel, user_mentions, reg_text)
         return
-
     sent_user = User.objects.get(username=user_mentions)
+    t_users = User.objects.filter(username__in=targets)
+    if PraiseHistory.objects.filter(from_who=sent_user, to_who__in=t_users,
+                                    sent_at__gt=datetime.now() - timedelta(minutes=3)):
+        return
+
     send_text = f"<@{user_mentions}>さんは次の人に「ありがとう」と言っています。\n"
     for user in targets:
         recv_user = User.objects.get(username=user)
